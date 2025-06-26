@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -57,6 +58,7 @@ public class KhachHang {
     public KhachHangResponse toResponse() {
         return new KhachHangResponse(id, ma, ten, email, passw, gioiTinh, sdt, diaChi, trangThai);
     }
+
     @Override
     public String toString() {
         return "KhachHang{" +

@@ -38,13 +38,12 @@ public class NhanVienController {
     }
 
 
-
     public NhanVien getEmployeeByID(String id) {
         return nhanVienRepositoty.findEmployeeByID(id);
     }
 
 
-//    public NhanVien addEmployee(NhanVienRequest req) {
+    //    public NhanVien addEmployee(NhanVienRequest req) {
 //
 //        if (nhanVienRepositoty.findNhanVienByEmail(req.getEmail()) != null) {
 //            throw new RuntimeException("Email đã tồn tại");

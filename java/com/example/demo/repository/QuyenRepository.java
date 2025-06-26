@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface QuyenRepository extends JpaRepository<Quyen, String> {
     Quyen findByMa(String ma);
+
     Optional<Quyen> findById(String id);
 
 }

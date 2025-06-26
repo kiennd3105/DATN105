@@ -23,8 +23,8 @@ public class KhachHangController {
 
 
     @GetMapping("/table")
-    public ResponseEntity<?> findAll(){
-        List<KhachHangResponse>list=new ArrayList<>();
+    public ResponseEntity<?> findAll() {
+        List<KhachHangResponse> list = new ArrayList<>();
         khachHangRepository.findAll().forEach(khachHang -> list.add(khachHang.toResponse()));
         return ResponseEntity.ok(list);
     }

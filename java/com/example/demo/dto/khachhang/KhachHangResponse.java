@@ -5,6 +5,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -19,7 +20,6 @@ public class KhachHangResponse {
     private String sdt;
     private String diaChi;
     private Integer trangThai;
-
 
 
 }
