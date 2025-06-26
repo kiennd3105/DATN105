@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.example.demo.dto.khachhang.KhachHangRequest;
 import com.example.demo.dto.khachhang.KhachHangResponse;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -75,4 +76,5 @@ public class KhachHang {
                 ", ngaySua=" + ngaySua +
                 '}';
     }
+
 }
