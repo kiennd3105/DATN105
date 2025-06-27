@@ -12,8 +12,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,9 +22,9 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
-    // Hiển thị danh sách voucher có tìm kiếm và phân trang
+    // Danh sách có tìm kiếm & phân trang
     @GetMapping
-    public String viewVouchers(
+    public String listVouchers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             @RequestParam(defaultValue = "") String keyword,
@@ -40,34 +38,54 @@ public class VoucherController {
         model.addAttribute("totalPages", pageResult.getTotalPages());
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        model.addAttribute("voucher", new Voucher());
-        return "vouchers";
+        return "voucher/vouchers"; // -> templates/voucher/vouchers.html
     }
 
-    // Lưu hoặc cập nhật voucher
+    // Hiển thị form tạo mới
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("voucher", new Voucher());
-        return "TaoMoi";
+        return "voucher/TaoMoi"; // -> templates/voucher/add.html
     }
 
+    // Hiển thị form sửa
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable("id") String id, Model model) {
+        Optional<Voucher> optionalVoucher = voucherService.findById(id);
+        if (optionalVoucher.isPresent()) {
+            model.addAttribute("voucher", optionalVoucher.get());
+            return "voucher/edit"; // -> templates/voucher/edit.html
+        }
+        return "redirect:/vouchers";
+    }
 
+    // Xem chi tiết
+    @GetMapping("/view/{id}")
+    public String viewVoucher(@PathVariable("id") String id, Model model) {
+        Optional<Voucher> voucher = voucherService.findById(id);
+        if (voucher.isEmpty()) return "redirect:/vouchers";
+        model.addAttribute("voucher", voucher.get());
+        return "voucher/add"; // dùng lại nếu bạn thiết kế chi tiết ở đây
+    }
 
-    //  Lưu dữ liệu tạo mới hoặc cập nhật
+    // Lưu (tạo mới hoặc cập nhật)
     @PostMapping("/save")
     public String saveVoucher(
             @Valid @ModelAttribute("voucher") Voucher voucher,
             BindingResult result,
-            Model model
-    ) {
+            Model model) {
+
         if (result.hasErrors()) {
-            model.addAttribute("voucher", voucher);
-            return "vouchers";
+            // Nếu lỗi và có id → đang sửa
+            if (voucher.getId() != null && !voucher.getId().isEmpty()) {
+                return "voucher/edit";
+            } else {
+                return "voucher/TaoMoi";
+            }
         }
 
-        // Nếu ID null thì là tạo mới
+        // Nếu tạo mới
         if (voucher.getId() == null || voucher.getId().isEmpty()) {
-            // Sinh ID 8 ký tự, viết hoa
             String id = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
             voucher.setId(id);
             voucher.setNgaytao(LocalDateTime.now());
@@ -75,39 +93,12 @@ public class VoucherController {
 
         voucher.setNgaysua(LocalDateTime.now());
         voucherService.save(voucher);
-
         return "redirect:/vouchers";
     }
 
-    @GetMapping("/view/{id}")
-    public String viewVoucher(@PathVariable("id") String id, Model model) {
-        Optional<Voucher> voucher = voucherService.findById(id);
-        if (voucher.isEmpty()) {
-            return "redirect:/vouchers";
-        }
-        model.addAttribute("voucher", voucher.get());
-        return "add"; // ← CHỖ NÀY
-    }
-
-
-
-
-
-    // Form sửa voucher
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") String id, Model model) {
-        Optional<Voucher> optionalVoucher = voucherService.findById(id);
-        if (optionalVoucher.isPresent()) {
-            model.addAttribute("voucher", optionalVoucher.get());
-            return "edit"; // → tên file .html
-        } else {
-            return "redirect:/vouchers";
-        }
-    }
-
-    // Xoá voucher
+    // Xoá
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable String id) {
+    public String deleteVoucher(@PathVariable String id) {
         voucherService.delete(id);
         return "redirect:/vouchers";
     }
