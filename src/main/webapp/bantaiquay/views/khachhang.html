@@ -1,0 +1,576 @@
+<section class="p-3">
+    <h1>Quản lý khách hàng</h1>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <input type="text" class="form-control" placeholder="Tìm theo tên" ng-model="search.ten"
+                   ng-change="searchAndFilter()">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" ng-model="search.gioiTinh" ng-change="searchAndFilter()">
+                <option value="">-- Giới tính --</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" placeholder="Địa chỉ" ng-model="search.diaChi"
+                   ng-change="searchAndFilter()">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" ng-model="search.trangThai" ng-change="searchAndFilter()">
+                <option value="">-- Trạng thái --</option>
+                <option value="1">Hoạt động</option>
+                <option value="0">Ngưng hoạt động</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-12 text-end">
+            <!--            <button class="btn btn-primary" ng-click="searchAndFilter()">Tìm kiếm</button>-->
+            <button class="btn btn-secondary" ng-click="resetFilters()">Xóa lọc</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                <i class="fa-solid fa-user-plus"></i> Thêm Khách Hàng
+            </button>
+        </div>
+    </div>
+    <div class="alert alert-success mt-3" role="alert" ng-show="successMessage">
+        {{ successMessage }}
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã</th>
+                    <th>Tên</th>
+                    <th>Email</th>
+                    <th>PassWord</th>
+                    <th>Giới Tính</th>
+                    <th>SDT</th>
+                    <th>Địa Chỉ</th>
+                    <th>Trạng Thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody id="data">
+                <tr ng-repeat="khachHang in listKhachHang">
+                    <td>{{ getSTT($index) }}</td>
+                    <td>{{ khachHang.ma }}</td>
+                    <td>{{ khachHang.ten }}</td>
+                    <td>{{ khachHang.email }}</td>
+                    <td>{{ khachHang.passw }}</td>
+                    <td>{{ khachHang.gioiTinh }}</td>
+                    <td>{{ khachHang.sdt }}</td>
+                    <td>{{ khachHang.diaChi }}</td>
+                    <td>
+                        {{ khachHang.trangThai == 1 ? 'Hoạt động' : 'Ngưng hoạt động' }}
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-success" ng-click="viewDetail(khachHang)" data-bs-toggle="modal"
+                                data-bs-target="#DetailForm"><i class="bi bi-eye"></i></button>
+                        <button class="btn btn-primary" ng-click="openUpdateModal(khachHang)" data-bs-toggle="modal"
+                                data-bs-target="#UpdateForm"><i class="bi bi-pencil-square"></i></button>
+                        <button class="btn btn-danger" ng-click="delete(khachHang.id)"
+                                ng-if="khachHang.trangThai === 1"><i
+                                class="bi bi-trash"></i></button>
+                        <button class="btn btn-success" ng-click="deleteback(khachHang.id)"
+                                ng-if="khachHang.trangThai === 0"><i
+                                class="bi bi-check-circle"></i></button>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p class="text-center text-muted" ng-if="listKhachHang.length === 0">{{ emptyMessage }}</p>
+            <ul class="pagination justify-content-center">
+                <li class="page-item" ng-class="{disabled: currentPage == 0}">
+                    <a class="page-link" href="" ng-click="prevPage()">«</a>
+                </li>
+                <li class="page-item" ng-repeat="n in range(totalPages) track by $index"
+                    ng-class="{active: n == currentPage}">
+                    <a class="page-link" href="" ng-click="setPage(n)">{{n + 1}}</a>
+                </li>
+                <li class="page-item" ng-class="{disabled: currentPage == totalPages - 1}">
+                    <a class="page-link" href="" ng-click="nextPage()">»</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!--add khách hàng-->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Thêm Khách Hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="#!/khachhang" id="addKhachHang" ng-submit="addKhachHang($event)">
+                    <div class="inputField">
+                        <div>
+                            <label for="ten">Họ và tên:</label>
+                            <input type="text" ng-model="ten" id="ten" >
+                            <span class="text-danger" ng-if="errorMessages.ten">{{ errorMessages.ten }}</span>
+
+                        </div>
+                        <div>
+                            <label for="email">Email:</label>
+                            <input type="email" ng-model="email" id="email" >
+                            <span class="text-danger" ng-if="errorMessages.email">{{ errorMessages.email }}</span>
+                        </div>
+                        <div>
+                            <label for="passw">PassWord:</label>
+                            <input type="text" ng-model="passw" id="passw" >
+                            <span class="text-danger" ng-if="errorMessages.passw">{{ errorMessages.passw }}</span>
+                        </div>
+                        <div>
+                            <label for="gioiTinh">Giới tính:</label>
+                            <select ng-model="gioiTinh" id="gioiTinh" class="short-select" >
+                                <option value="" disabled selected>Chọn Giới Tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                            <span class="text-danger" ng-if="errorMessages.gioiTinh">{{ errorMessages.gioiTinh }}</span>
+                        </div>
+                        <div>
+                            <label for="sdt">SDT :</label>
+                            <input type="text" ng-model="sdt" id="sdt" >
+                            <span class="text-danger" ng-if="errorMessages.sdt">{{ errorMessages.sdt }}</span>
+                        </div>
+                        <div>
+                            <label for="diaChi">Địa chỉ:</label>
+                            <input type="text" ng-model="diaChi" name="diaChi" id="diaChi" >
+                            <span class="text-danger" ng-if="errorMessages.diaChi">{{ errorMessages.diaChi }}</span>
+                        </div>
+                        <div>
+                            <label for="trangThai">Trạng thái:</label>
+                            <select ng-model="trangThai" id="trangThai" name="trangThai" class="short-select" >
+                                <option value="" disabled selected>Chọn Trạng Thái</option>
+                                <option value="1">Hoạt động</option>
+                                <option value="0">Ngưng hoạt động</option>
+                            </select>
+                            <span class="text-danger" ng-if="errorMessages.trangThai">{{ errorMessages.trangThai }}</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="addKhachHang" class="btn btn-primary submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- update khách hàng-->
+<div class="modal fade" id="UpdateForm" tabindex="-1" aria-labelledby="userFormLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập Nhật Khách Hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="#!/khachhang" id="updateKhachHang" ng-submit="updateKhachHang()">
+                    <div class="inputField">
+                        <div>
+                            <label>Họ và tên:</label>
+                            <input type="text" ng-model="selectedKhachHang.ten" id="tenUpdate">
+                            <span class="text-danger" ng-if="errorMessages.ten">{{ errorMessages.ten }}</span>
+                        </div>
+                        <div>
+                            <label>Email:</label>
+                            <input type="email" ng-model="selectedKhachHang.email" id="emailUpdate">
+                            <span class="text-danger" ng-if="errorMessages.email">{{ errorMessages.email }}</span>
+                        </div>
+                        <div>
+                            <label>Mật khẩu:</label>
+                            <input type="text" ng-model="selectedKhachHang.passw" id="passwUpdate">
+                            <span class="text-danger" ng-if="errorMessages.passw">{{ errorMessages.passw }}</span>
+                        </div>
+                        <div>
+                            <label for="gioiTinhUpdate">Giới tính:</label>
+                            <select ng-model="selectedKhachHang.gioiTinh" id="gioiTinhUpdate" class="short-select">
+                                <option value="" disabled selected>Chọn Giới Tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                            <span class="text-danger" ng-if="errorMessages.gioiTinh">{{ errorMessages.gioiTinh }}</span>
+                        </div>
+                        <div>
+                            <label>SDT:</label>
+                            <input type="text" ng-model="selectedKhachHang.sdt" id="sdtUpdate">
+                            <span class="text-danger" ng-if="errorMessages.sdt">{{ errorMessages.sdt }}</span>
+                        </div>
+                        <div>
+                            <label>Địa chỉ:</label>
+                            <input type="text" ng-model="selectedKhachHang.diaChi" id="diaChiUpdate">
+                            <span class="text-danger" ng-if="errorMessages.diaChi">{{ errorMessages.diaChi }}</span>
+                        </div>
+                        <div>
+                            <label for="trangThaiUpdate">Trạng thái:</label>
+                            <select ng-model="selectedKhachHang.trangThai" id="trangThaiUpdate" class="short-select">
+                                <option value="" disabled>Chọn Trạng Thái</option>
+                                <option value="1">Hoạt động</option>
+                                <option value="0">Ngưng hoạt động</option>
+                            </select>
+                            <span class="text-danger" ng-if="errorMessages.trangThai">{{ errorMessages.trangThai }}</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="updateKhachHang" class="btn btn-primary submit">Cập Nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Detail khách hàng -->
+<div class="modal fade" id="DetailForm" tabindex="-1" aria-labelledby="userFormLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông Tin Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="#" id="myForm1">
+                    <div class="inputField">
+                        <div>
+                            <label>Họ và tên:</label>
+                            <input type="text" id="Showten" ng-model="selectedKhachHang.ten" readonly>
+                        </div>
+                        <div>
+                            <label>Email:</label>
+                            <input type="email" id="Showemail" ng-model="selectedKhachHang.email" readonly>
+                        </div>
+                        <div>
+                            <label>PassWord:</label>
+                            <input type="text" id="ShowpassWord" ng-model="selectedKhachHang.passw" readonly>
+                        </div>
+                        <div>
+                            <label>Giới tính:</label>
+                            <input type="text" id="ShowgioiTinh" ng-model="selectedKhachHang.gioiTinh" readonly>
+                        </div>
+                        <div>
+                            <label>SDT:</label>
+                            <input type="text" id="ShowSDT" ng-model="selectedKhachHang.sdt" readonly>
+                        </div>
+                        <div>
+                            <label>Địa chỉ:</label>
+                            <input type="text" id="ShowdiaChi" ng-model="selectedKhachHang.diaChi" readonly>
+                        </div>
+                        <div>
+                            <label>Trạng thái:</label>
+                            <input type="text" id="ShowtrangThai" ng-model="selectedKhachHang.trangThai" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table thead th {
+        background-color: rgb(75, 170, 255); /* Nền màu xanh dương cho tiêu đề bảng */
+        color: white; /* Màu chữ trắng cho tiêu đề */
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    section.p-3 {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    /* Nút Thêm Nhân Viên */
+    button.btn-primary {
+        background-color: #007bff;
+        border: none;
+        font-weight: bold;
+        padding: 8px 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    button.btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    /* Bảng quản lý nhân viên */
+    .table-hover {
+        margin-top: 20px;
+    }
+
+    .table th {
+        font-weight: bold;
+        color: #555;
+        background-color: #f9f9f9;
+        text-align: center;
+    }
+
+    .table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table img {
+        border-radius: 4px;
+    }
+
+    /* Nút thao tác */
+    .table .btn {
+        margin: 0 4px;
+        padding: 6px 10px;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+    }
+
+    .btn:hover {
+        opacity: 0.85;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-top: 15px;
+    }
+
+    .page-link {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .page-link:hover {
+        color: #0056b3;
+    }
+
+    .table .actions {
+        display: flex;
+    }
+
+    .actions .btn {
+        white-space: nowrap; /* Tránh ngắt dòng nút */
+    }
+
+    /* Modal thêm và cập nhật nhân viên */
+    .modal-content {
+        border-radius: 8px;
+        z-index: 1000;
+    }
+
+    .modal-header {
+        background-color: #007bff;
+        color: #fff;
+        border-bottom: none;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .modal-title {
+        font-weight: bold;
+    }
+
+    .modal-footer .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .modal-footer .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    /* Phần upload ảnh */
+    .imgholder {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        margin-bottom: 15px;
+    }
+
+    .imgholder img {
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .upload {
+        color: #007bff;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .upload:hover {
+        color: #0056b3;
+    }
+
+    /* Input và Select */
+    .inputField {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .inputField label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .inputField input,
+    .inputField select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .short-select {
+        width: 100%;
+        max-width: 370px;
+    }
+
+    table tr td {
+        vertical-align: middle;
+    }
+
+    td button {
+        margin: 5px;
+    }
+
+    td button i {
+        font-size: 20px;
+    }
+
+
+    .modal-header {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+    .modal-body form {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0;
+    }
+
+    .modal-body form .imgholder {
+        width: 200px;
+        height: 200px;
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .imgholder .upload {
+        position: absolute;
+        bottom: 0;
+        left: 10;
+        width: 100%;
+        height: 100px;
+        background: rgba(0, 0, 0, 0.3);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .upload i {
+        color: #fff;
+        font-size: 35px;
+    }
+
+    .imgholder:hover .upload {
+        display: flex;
+    }
+
+    .imgholder .upload input {
+        display: none;
+    }
+
+    .modal-body form .inputField {
+        flex-basis: 68%;
+        border-left: 5px groove blue;
+        padding-left: 20px;
+    }
+
+    form .inputField > div {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    form .inputField > div label {
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    #userForm form .inputField > div label::after {
+        content: "*";
+        color: red;
+    }
+
+    form .inputField > div input {
+        width: 75%;
+        padding: 10px;
+        border: none;
+        outline: none;
+        background: transparent;
+        border-bottom: 2px solid blue;
+    }
+
+    .modal-footer .submit {
+        font-size: 18px;
+    }
+
+
+    #readData form .inputField > div input {
+        color: #000;
+        font-size: 18px;
+    }
+</style>

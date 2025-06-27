@@ -27,7 +27,7 @@ app.config(function ($routeProvider) {
             controller: nhansuCtrl
         })
         .when('/khachhang', {
-            templateUrl: 'view/khachhang.html',
+            templateUrl: 'views/khachhang.html',
             controller: khachhangCtrl
         })
         .when('/thanhtoan/:idHD', {  // Add dynamic route for payment
@@ -63,20 +63,6 @@ app.controller('myCtrl', function ($scope, $http) {
     const login = sessionStorage.getItem('loginOk')
 
 
-    // if (!login) {
-    //     window.location.href = 'http://localhost:63342/demo/src/main/webapp/ban_tai_quay/view/login.html'
-    //     return
-    // }
-    //
-    // const idNV = sessionStorage.getItem('idNV');
-    const idNV='909918DD'
-    //
-    // if (!idNV) {
-    //     console.error('Không tìm thấy ID nhân viên trong sessionStorage');
-    //     return;
-    // }
-    // let getNV
-
     const profileButton = document.querySelector('.profile');
     const profileModal = document.querySelector('#profileModal');
 
@@ -105,25 +91,6 @@ app.controller('myCtrl', function ($scope, $http) {
             const imgAcc = document.querySelector("#img-acc")
             imgAcc.src = nhanVien.img
         })
-    profileButton.addEventListener('click', async () => {
-        const profileModalBody = document.querySelector('#profileModal .modal-body');
-        profileModalBody.innerHTML = `
-                        <div class="form-group">
-                            <label>Tên nhân viên:</label>
-                            <p>${getNV.ten || 'Chưa đăng nhập'}</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Email:</label>
-                            <p>${getNV.email || 'Chưa đăng nhập'}</p>
-                        </div>
-                        <div class="form-group">
-                            <label>Quyền:</label>
-                            <p>${getNV.tenQuyen || 'Chưa đăng nhập'}</p>
-                        </div>                     
-                    `;
-
-        $('#profileModal').modal('show');
-    })
 
     $scope.logout = function() {
         $('#profileModal').modal('hide');
