@@ -1,7 +1,7 @@
-package com.example.totnghiep.Repository;
+package com.example.demo.repository;
 
-import com.example.totnghiep.Entity.KhachHang;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.entity.KhachHang;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface KhachHangRepository extends JpaRepository<KhachHang, String> {

@@ -1,6 +1,6 @@
-package com.example.totnghiep.Repository;
+package com.example.demo.repository;
 
-import com.example.totnghiep.Entity.Voucher;
+import com.example.demo.entity.Voucher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

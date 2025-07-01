@@ -1,9 +1,11 @@
-package com.example.totnghiep.Repository;
+package com.example.demo.repository;
 
-import com.example.totnghiep.Entity.HoaDon;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.entity.HoaDon;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface HoaDonRepository extends JpaRepository<HoaDon, String> {
 
+    List<HoaDon> findByMaHoaDonContaining(String maHoaDon);
 }
