@@ -1,7 +1,7 @@
-package com.example.totnghiep.Controller;
+package com.example.demo.contrroller;
 
-import com.example.totnghiep.Entity.Voucher;
-import com.example.totnghiep.Service.VoucherService;
+import com.example.demo.dto.khachhang.VoucherService;
+import com.example.demo.entity.Voucher;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,7 +22,7 @@ public class VoucherController {
     @Autowired
     private VoucherService voucherService;
 
-    // Danh sách có tìm kiếm & phân trang
+    // Trang danh sách voucher + tìm kiếm + phân trang
     @GetMapping
     public String listVouchers(
             @RequestParam(defaultValue = "0") int page,
@@ -38,53 +38,109 @@ public class VoucherController {
         model.addAttribute("totalPages", pageResult.getTotalPages());
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
-        return "voucher/vouchers"; // -> templates/voucher/vouchers.html
+
+        // Không gán voucher hoặc mode nếu chỉ muốn hiển thị danh sách
+        return "vouchers";
+    }
+    // Xem chi tiết voucher
+    @GetMapping("/view/{id}")
+    public String viewVoucher(@PathVariable("id") String id,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "5") int size,
+                              @RequestParam(defaultValue = "") String keyword,
+                              @RequestParam(defaultValue = "") String status,
+                              Model model) {
+
+        Optional<Voucher> optionalVoucher = voucherService.findById(id);
+        if (optionalVoucher.isPresent()) {
+            Page<Voucher> pageResult = voucherService.searchByKeywordAndStatus(keyword, status, PageRequest.of(page, size));
+
+            model.addAttribute("vouchers", pageResult);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", pageResult.getTotalPages());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+
+            model.addAttribute("voucher", optionalVoucher.get());
+            model.addAttribute("mode", "view");
+            return "vouchers";
+        }
+
+        return "redirect:/vouchers";
     }
 
     // Hiển thị form tạo mới
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
+    public String createVoucherForm(Model model,
+                                    @RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "5") int size,
+                                    @RequestParam(defaultValue = "") String keyword,
+                                    @RequestParam(defaultValue = "") String status) {
+
+        Page<Voucher> pageResult = voucherService.searchByKeywordAndStatus(keyword, status, PageRequest.of(page, size));
+
+        model.addAttribute("vouchers", pageResult);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", pageResult.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
+
         model.addAttribute("voucher", new Voucher());
-        return "voucher/TaoMoi"; // -> templates/voucher/add.html
+        model.addAttribute("mode", "create");
+        return "vouchers";
     }
 
-    // Hiển thị form sửa
+    // Hiển thị form chỉnh sửa
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable("id") String id, Model model) {
+    public String editVoucherForm(@PathVariable("id") String id,
+                                  @RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "5") int size,
+                                  @RequestParam(defaultValue = "") String keyword,
+                                  @RequestParam(defaultValue = "") String status,
+                                  Model model) {
+
         Optional<Voucher> optionalVoucher = voucherService.findById(id);
         if (optionalVoucher.isPresent()) {
+
+            Page<Voucher> pageResult = voucherService.searchByKeywordAndStatus(keyword, status, PageRequest.of(page, size));
+
+            model.addAttribute("vouchers", pageResult);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", pageResult.getTotalPages());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+
             model.addAttribute("voucher", optionalVoucher.get());
-            return "voucher/edit"; // -> templates/voucher/edit.html
+            model.addAttribute("mode", "edit");
+            return "vouchers";
         }
         return "redirect:/vouchers";
     }
 
-    // Xem chi tiết
-    @GetMapping("/view/{id}")
-    public String viewVoucher(@PathVariable("id") String id, Model model) {
-        Optional<Voucher> voucher = voucherService.findById(id);
-        if (voucher.isEmpty()) return "redirect:/vouchers";
-        model.addAttribute("voucher", voucher.get());
-        return "voucher/add"; // dùng lại nếu bạn thiết kế chi tiết ở đây
-    }
-
-    // Lưu (tạo mới hoặc cập nhật)
+    // Lưu voucher (tạo mới hoặc cập nhật)
     @PostMapping("/save")
     public String saveVoucher(
             @Valid @ModelAttribute("voucher") Voucher voucher,
             BindingResult result,
-            Model model) {
+            Model model,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String status) {
 
         if (result.hasErrors()) {
-            // Nếu lỗi và có id → đang sửa
-            if (voucher.getId() != null && !voucher.getId().isEmpty()) {
-                return "voucher/edit";
-            } else {
-                return "voucher/TaoMoi";
-            }
+            Page<Voucher> pageResult = voucherService.searchByKeywordAndStatus(keyword, status, PageRequest.of(page, size));
+
+            model.addAttribute("vouchers", pageResult);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", pageResult.getTotalPages());
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("status", status);
+
+            model.addAttribute("mode", (voucher.getId() == null || voucher.getId().isEmpty()) ? "create" : "edit");
+            return "vouchers";
         }
 
-        // Nếu tạo mới
         if (voucher.getId() == null || voucher.getId().isEmpty()) {
             String id = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
             voucher.setId(id);
@@ -96,7 +152,7 @@ public class VoucherController {
         return "redirect:/vouchers";
     }
 
-    // Xoá
+    // Xoá voucher
     @GetMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable String id) {
         voucherService.delete(id);
