@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <meta charset="UTF-8">
+    <title>Voucher Chi Tiết</title>
+    <style>
+        /* Style dùng chung */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .form-container, .detail-container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        select, input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 90%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f3f3f3;
+        }
+
+        a.button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        a.button.delete {
+            background-color: red;
+        }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination-button {
+            padding: 6px 12px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .pagination-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== LIST MODE ========== -->
+<div th:if="${mode == 'list'}">
+    <h2>Danh sách Voucher Chi Tiết</h2>
+    <form method="get" th:action="@{/voucher-ct}" class="container my-4">
+        <div class="row justify-content-center align-items-center g-2">
+            <div class="col-md-4">
+                <input type="text" name="keyword" th:value="${keyword}"
+                       class="form-control" placeholder="Tìm theo tên khách, mã voucher..." />
+            </div>
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Tìm kiếm
+                </button>
+            </div>
+            <div class="col-md-auto">
+                <a th:href="@{/voucher-ct/create}" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i> Thêm mới
+                </a>
+            </div>
+        </div>
+    </form>
+
+
+    <table>
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Mã Voucher</th>
+            <th>Khách hàng</th>
+            <th>Hóa đơn</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Ngày sửa</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="vc, iter : ${list.content}">
+            <td th:text="${iter.index + 1}"></td>
+            <td th:text="${vc.voucher.mavc}"></td>
+            <td th:text="${vc.khachHang.tenKH}"></td>
+            <td th:text="${vc.hoaDon.maHD}"></td>
+            <td th:text="${vc.trangThai}"></td>
+            <td th:text="${#temporals.format(vc.ngayTao, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${vc.ngaySua != null ? #temporals.format(vc.ngaySua, 'dd/MM/yyyy HH:mm') : ''}"></td>
+            <td>
+                <a class="button" th:href="@{'/voucher-ct/edit/' + ${vc.id}}">Sửa</a>
+                <a class="button" th:href="@{'/voucher-ct/view/' + ${vc.id}}">Xem</a>
+                <a class="button delete" th:href="@{'/voucher-ct/delete/' + ${vc.id}}" onclick="return confirm('Bạn có chắc chắn muốn xóa không?')">Xóa</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center align-items-center my-4 gap-3 pagination">
+        <a class="btn btn-outline-primary"
+           th:if="${list.hasPrevious()}"
+           th:href="@{/voucher-ct(page=${list.number - 1}, keyword=${keyword})}">
+            ⟨ Trước
+        </a>
+
+        <span class="fw-semibold">
+        Trang <span th:text="${list.number + 1}"></span> / <span th:text="${list.totalPages}"></span>
+    </span>
+
+        <a class="btn btn-outline-primary"
+           th:if="${list.hasNext()}"
+           th:href="@{/voucher-ct(page=${list.number + 1}, keyword=${keyword})}">
+            Sau ⟩
+        </a>
+    </div>
+
+</div>
+
+<!-- ========== FORM MODE ========== -->
+<div th:if="${mode == 'form'}" class="form-container">
+    <h2>Thêm / Sửa Voucher Chi Tiết</h2>
+    <form th:action="@{/voucher-ct/save}" method="post" th:object="${voucherCT}">
+        <input type="hidden" th:field="*{id}" />
+
+        <label for="voucher">Voucher</label>
+        <select id="voucher" th:field="*{voucher.id}">
+            <option th:each="v : ${vouchers}" th:value="${v.id}" th:text="${v.mavc}">Voucher</option>
+        </select>
+
+        <label for="khachHang">Khách hàng</label>
+        <select id="khachHang" th:field="*{khachHang.id}">
+            <option th:each="k : ${khachHangs}" th:value="${k.id}" th:text="${k.tenKH}">Khách hàng</option>
+        </select>
+
+        <label for="hoaDon">Hóa đơn</label>
+        <select id="hoaDon" th:field="*{hoaDon.id}">
+            <option th:each="h : ${hoaDons}" th:value="${h.id}" th:text="${h.maHD}">Hóa đơn</option>
+        </select>
+
+        <label for="trangThai">Trạng thái</label>
+        <input type="number" id="trangThai" th:field="*{trangThai}" />
+
+        <button type="submit">Lưu</button>
+    </form>
+</div>
+
+<!-- ========== VIEW MODE ========== -->
+<div th:if="${mode == 'view'}" class="detail-container">
+    <h2>Chi tiết Voucher Chi Tiết</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <td th:text="${voucherCT.id}"></td>
+        </tr>
+        <tr>
+            <th>Mã Voucher</th>
+            <td th:text="${voucherCT.voucher.mavc}"></td>
+        </tr>
+        <tr>
+            <th>Tên Khách Hàng</th>
+            <td th:text="${voucherCT.khachHang.tenKH}"></td>
+        </tr>
+        <tr>
+            <th>Mã Hóa Đơn</th>
+            <td th:text="${voucherCT.hoaDon.maHD}"></td>
+        </tr>
+        <tr>
+            <th>Trạng Thái</th>
+            <td th:text="${voucherCT.trangThai}"></td>
+        </tr>
+        <tr>
+            <th>Ngày Tạo</th>
+            <td th:text="${#temporals.format(voucherCT.ngayTao, 'dd/MM/yyyy HH:mm')}"></td>
+        </tr>
+        <tr th:if="${voucherCT.ngaySua != null}">
+            <th>Ngày Sửa</th>
+            <td th:text="${#temporals.format(voucherCT.ngaySua, 'dd/MM/yyyy HH:mm')}"></td>
+        </tr>
+    </table>
+    <div style="text-align: center; margin-top: 20px;">
+        <a class="button" th:href="@{/voucher-ct}">Quay lại danh sách</a>
+    </div>
+</div>
+
+</body>
+</html>
