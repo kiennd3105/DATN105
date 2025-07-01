@@ -1,6 +1,7 @@
-package com.example.totnghiep.Service;
+package com.example.demo.dto.khachhang;
 
-import com.example.totnghiep.Entity.VoucherCT;
+
+import com.example.demo.entity.VoucherCT;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

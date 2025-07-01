@@ -1,9 +1,8 @@
-package com.example.totnghiep.Service;
+package com.example.demo.dto.khachhang;
 
-import com.example.totnghiep.Entity.KhachHang;
-import com.example.totnghiep.Entity.Voucher;
-import com.example.totnghiep.Repository.KhachHangRepository;
-import com.example.totnghiep.Repository.VoucherRepository;
+
+import com.example.demo.entity.Voucher;
+import com.example.demo.repository.VoucherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
