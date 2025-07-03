@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách hóa đơn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary">Danh sách hóa đơn</h2>
+
+    <form th:action="@{/hoa-don/hien-thi}" method="get" class="input-group mb-4">
+        <input type="text" name="keyword" class="form-control" placeholder="Nhập mã hóa đơn..." th:value="${keyword}">
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+    </form>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="hoaDonTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="da-tab" data-bs-toggle="tab" data-bs-target="#da" type="button" role="tab">Đã thanh toán</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="chua-tab" data-bs-toggle="tab" data-bs-target="#chua" type="button" role="tab">Chưa thanh toán</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="hoaDonTabContent">
+        <!-- Đã thanh toán -->
+        <div class="tab-pane fade show active" id="da" role="tabpanel">
+            <table class="table table-bordered table-hover bg-white">
+                <thead class="table-success text-dark">
+                <tr>
+                    <th>Mã Hóa Đơn</th><th>Ngày Tạo</th><th>Ngày Sửa</th>
+                    <th>Loại</th><th>Tổng Tiền</th><th>HTTT</th><th>Phí VC</th>
+                    <th>Người Nhận</th><th>Địa Chỉ</th><th>SDT</th>
+                    <th>Trạng Thái</th><th>Khách Hàng</th><th>Nhân Viên</th><th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="hd : ${daThanhToan}">
+                    <td th:text="${hd.maHoaDon}">Mã HĐ</td>
+                    <td th:text="${#temporals.format(hd.ngayTao, 'dd/MM/yyyy HH:mm')}">Ngày tạo</td>
+                    <td th:text="${#temporals.format(hd.ngaySua, 'dd/MM/yyyy HH:mm')}">Ngày sửa</td>
+                    <td th:text="${hd.loaiHoaDon == 1 ? 'Hóa đơn điện tử' : 'In giấy'}"></td>
+                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${hd.hinhThucThanhToan}">HTTT</td>
+                    <td th:text="${hd.phiVanChuyen}">Phí VC</td>
+                    <td th:text="${hd.tenNguoiNhan}">Người nhận</td>
+                    <td th:text="${hd.diaChiNguoiNhan}">Địa chỉ</td>
+                    <td th:text="${hd.sdtNguoiNhan}">SĐT</td>
+                    <td class="text-success fw-bold">Đã thanh toán</td>
+                    <td th:text="${hd.khachHang != null ? hd.khachHang.ten : '--'}">KH</td>
+                    <td th:text="${hd.nhanVien != null ? hd.nhanVien.ten : '--'}">NV</td>
+                    <td>
+                        <a th:href="@{/hoa-don/hien-thi(id=${hd.id})}" class="btn btn-sm btn-info">Chi tiết</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chưa thanh toán -->
+        <div class="tab-pane fade" id="chua" role="tabpanel">
+            <table class="table table-bordered table-hover bg-white">
+                <thead class="table-danger text-dark">
+                <tr>
+                    <th>Mã Hóa Đơn</th><th>Ngày Tạo</th><th>Ngày Sửa</th>
+                    <th>Loại</th><th>Tổng Tiền</th><th>HTTT</th><th>Phí VC</th>
+                    <th>Người Nhận</th><th>Địa Chỉ</th><th>SDT</th>
+                    <th>Trạng Thái</th><th>Khách Hàng</th><th>Nhân Viên</th><th>Thao Tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="hd : ${chuaThanhToan}">
+                    <td th:text="${hd.maHoaDon}">Mã HĐ</td>
+                    <td th:text="${#temporals.format(hd.ngayTao, 'dd/MM/yyyy HH:mm')}">Ngày tạo</td>
+                    <td th:text="${#temporals.format(hd.ngaySua, 'dd/MM/yyyy HH:mm')}">Ngày sửa</td>
+                    <td th:text="${hd.loaiHoaDon == 1 ? 'Hóa đơn điện tử' : 'In giấy'}"></td>
+                    <td th:text="${#numbers.formatDecimal(hd.tongTien, 0, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="${hd.hinhThucThanhToan}">HTTT</td>
+                    <td th:text="${hd.phiVanChuyen}">Phí VC</td>
+                    <td th:text="${hd.tenNguoiNhan}">Người nhận</td>
+                    <td th:text="${hd.diaChiNguoiNhan}">Địa chỉ</td>
+                    <td th:text="${hd.sdtNguoiNhan}">SĐT</td>
+                    <td class="text-danger fw-bold">Chưa thanh toán</td>
+                    <td th:text="${hd.khachHang != null ? hd.khachHang.ten : '--'}">KH</td>
+                    <td th:text="${hd.nhanVien != null ? hd.nhanVien.ten : '--'}">NV</td>
+                    <td>
+                        <a th:href="@{/hoa-don/hien-thi(id=${hd.id})}" class="btn btn-sm btn-info">Chi tiết</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:if="${khongTimThay}" class="alert alert-danger mt-3">
+        Không tìm thấy mã hóa đơn này.
+    </div>
+
+    <!-- Chi tiết hóa đơn -->
+    <div th:if="${hoaDon != null}" class="mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Chi Tiết Hóa Đơn: <span th:text="${hoaDon.maHoaDon}"></span></h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Người Nhận:</strong> <span th:text="${hoaDon.tenNguoiNhan}"></span></p>
+                <p><strong>Địa Chỉ:</strong> <span th:text="${hoaDon.diaChiNguoiNhan}"></span></p>
+                <p><strong>SĐT:</strong> <span th:text="${hoaDon.sdtNguoiNhan}"></span></p>
+                <p><strong>Tổng Tiền:</strong> <span th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 2, 'POINT')}"></span></p>
+
+                <h5 class="mt-4">Danh sách chi tiết hóa đơn</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-sm mt-3">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID CTHD</th><th>Số Lượng</th><th>Đơn Giá</th><th>Tổng Tiền</th>
+                            <th>Ghi Chú</th><th>Ngày Tạo</th><th>Ngày Sửa</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="ct : ${chiTietList}">
+                            <td th:text="${ct.id}">ID</td>
+                            <td th:text="${ct.soLuong}">SL</td>
+                            <td th:text="${#numbers.formatDecimal(ct.donGia, 0, 'COMMA', 2, 'POINT')}">ĐG</td>
+                            <td th:text="${#numbers.formatDecimal(ct.tongTien, 0, 'COMMA', 2, 'POINT')}">TT</td>
+                            <td th:text="${ct.ghiChu}">Ghi chú</td>
+                            <td th:text="${#temporals.format(ct.ngayTao, 'dd/MM/yyyy HH:mm')}">Tạo</td>
+                            <td th:text="${#temporals.format(ct.ngaySua, 'dd/MM/yyyy HH:mm')}">Sửa</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

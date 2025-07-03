@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -17,45 +16,52 @@ import java.util.List;
 @Controller
 @RequestMapping("/hoa-don")
 public class HoaDonController {
-    @Autowired
-    HoaDonRepository hoaDonRepository;
 
     @Autowired
-    HoaDonChiTietRepository hoaDonChiTietRepository;
+    private HoaDonRepository hoaDonRepository;
+
+    @Autowired
+    private HoaDonChiTietRepository hoaDonChiTietRepository;
 
     @GetMapping("/hien-thi")
-    public String hienThi(@RequestParam(name = "keyword", required = false) String keyword, Model model) {
-        List<HoaDon> list;
-        boolean khongTimThay = false;
+    public String hienThi(@RequestParam(name = "keyword", required = false) String keyword,
+                          @RequestParam(name = "id", required = false) String id,
+                          Model model) {
 
+        boolean khongTimThay = false;
+        List<HoaDon> daThanhToan;
+        List<HoaDon> chuaThanhToan;
+
+        // Tìm kiếm theo mã hóa đơn nếu có keyword
         if (keyword != null && !keyword.isEmpty()) {
-            list = hoaDonRepository.findByMaHoaDonContaining(keyword);
-            if (list.isEmpty()) {
+            daThanhToan = hoaDonRepository.findByMaHoaDonContainingAndTrangThai(keyword, 1);
+            chuaThanhToan = hoaDonRepository.findByMaHoaDonContainingAndTrangThai(keyword, 0);
+
+            if (daThanhToan.isEmpty() && chuaThanhToan.isEmpty()) {
                 khongTimThay = true;
             }
         } else {
-            list = hoaDonRepository.findAll();
+            // Nếu không có keyword thì lấy toàn bộ danh sách
+            daThanhToan = hoaDonRepository.findByTrangThai(1);
+            chuaThanhToan = hoaDonRepository.findByTrangThai(0);
         }
 
-        model.addAttribute("dsHoaDon", list);
+        // Truyền dữ liệu sang view
+        model.addAttribute("daThanhToan", daThanhToan);
+        model.addAttribute("chuaThanhToan", chuaThanhToan);
         model.addAttribute("keyword", keyword);
         model.addAttribute("khongTimThay", khongTimThay);
-        return "hoadon";
-    }
 
-    @GetMapping("/detail/{id}")
-    public String chiTietHoaDon(@PathVariable("id") String id, Model model) {
-        HoaDon hoaDon = hoaDonRepository.findById(id).orElse(null);
-
-        if (hoaDon == null) {
-            return "redirect:/hoa-don/hien-thi"; // không tìm thấy thì quay về danh sách
+        // Hiển thị chi tiết nếu có ID
+        if (id != null && !id.isEmpty()) {
+            HoaDon hoaDon = hoaDonRepository.findById(id).orElse(null);
+            if (hoaDon != null) {
+                List<HoaDonChiTiet> chiTietList = hoaDonChiTietRepository.findByHoaDon_Id(id);
+                model.addAttribute("hoaDon", hoaDon);
+                model.addAttribute("chiTietList", chiTietList);
+            }
         }
 
-        List<HoaDonChiTiet> chiTietList = hoaDonChiTietRepository.findByHoaDon_Id(id);
-
-        model.addAttribute("hoaDon", hoaDon);
-        model.addAttribute("chiTietList", chiTietList);
-
-        return "detail";
+        return "hoadon";
     }
 }
