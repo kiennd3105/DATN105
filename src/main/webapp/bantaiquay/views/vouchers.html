@@ -1,214 +1,139 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <title>Quản Lý Voucher</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../script/voucher.js" defer></script>
 </head>
 <body class="container mt-4">
 
-<!-- ======= THÔNG BÁO MODE (DEBUG) ======= -->
-<!--<div>-->
-<!--    <p th:text="'[DEBUG] Mode hiện tại: ' + ${mode}">[DEBUG] Chưa nhận được mode</p>-->
-<!--</div>-->
+<h2 class="text-center mb-4">Danh sách Voucher</h2>
 
-<!-- ======= DANH SÁCH ======= -->
-<div th:if="${mode == null or mode == 'list'}">
-    <h2 class="mb-4 text-center">Danh sách Voucher</h2>
-
-    <form class="row g-2 mb-4" method="get" th:action="@{/vouchers}">
-        <div class="col-md-4">
-            <input type="text" name="keyword" class="form-control" placeholder="Từ khóa" th:value="${keyword}">
-        </div>
-        <div class="col-md-3">
-            <select name="status" class="form-select">
-                <option value="" th:selected="${status == null or status == ''}">-- Tất cả trạng thái --</option>
-                <option value="1" th:selected="${status == '1'}">Đang hoạt động</option>
-                <option value="0" th:selected="${status == '0'}">Ngưng</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Tìm & Lọc</button>
-        </div>
-        <div class="col-md-3 text-end">
-            <!-- ẨN nút tạo mới -->
-             <a th:href="@{/vouchers/create}" class="btn btn-success w-100">+ Tạo mới Voucher</a>
-        </div>
-    </form>
-
-    <table class="table table-bordered table-hover">
-        <thead class="table-light text-center">
-        <tr>
-            <th>Mã</th><th>Code</th><th>Giảm</th><th>Điều kiện</th><th>Trạng thái</th><th>Ngày tạo</th><th>Hành động</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="voucher : ${vouchers.content}">
-            <td th:text="${voucher.mavc}">Mã</td>
-            <td th:text="${voucher.code}">Code</td>
-            <td th:text="${voucher.giatrigiam}">0</td>
-            <td th:text="${voucher.dieukien}">0</td>
-            <td th:text="${voucher.trangthai == 1 ? 'Đang hoạt động' : 'Ngưng'}"></td>
-            <td th:text="${#temporals.format(voucher.ngaytao, 'dd/MM/yyyy HH:mm')}"></td>
-            <td class="text-center">
-                <!-- ẨN nút xem và sửa -->
-
-                 <a th:href="@{'/vouchers/view/' + ${voucher.id}}" class="btn btn-info btn-sm">Xem</a>
-                 <a th:href="@{'/vouchers/edit/' + ${voucher.id}}" class="btn btn-sm btn-primary">Sửa</a>
-                <a th:href="@{'/vouchers/delete/' + ${voucher.id}}" class="btn btn-sm btn-danger"
-                   onclick="return confirm('Bạn có chắc muốn xoá voucher này?');">Xoá</a>
-            </td>
-        </tr>
-        <tr th:if="${vouchers.content.isEmpty()}">
-            <td colspan="7" class="text-center text-muted">Không có voucher nào được tìm thấy.</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <nav aria-label="Page navigation">
-        <ul class="pagination justify-content-center">
-            <li class="page-item" th:classappend="${vouchers.first} ? 'disabled'">
-                <a class="page-link" th:href="@{/vouchers(page=${vouchers.number - 1}, keyword=${keyword}, status=${status})}">&laquo;</a>
-            </li>
-            <li class="page-item" th:each="i : ${#numbers.sequence(0, vouchers.totalPages - 1)}"
-                th:classappend="${i == vouchers.number} ? 'active'">
-                <a class="page-link" th:href="@{/vouchers(page=${i}, keyword=${keyword}, status=${status})}" th:text="${i + 1}">1</a>
-            </li>
-            <li class="page-item" th:classappend="${vouchers.last} ? 'disabled'">
-                <a class="page-link" th:href="@{/vouchers(page=${vouchers.number + 1}, keyword=${keyword}, status=${status})}">&raquo;</a>
-            </li>
-        </ul>
-    </nav>
-</div>
-<!-- ======= FORM TẠO / SỬA ======= -->
-<div th:if="${mode == 'create' or mode == 'edit'}">
-    <h2 class="mb-4 text-center" th:text="${mode == 'create' ? '🆕 Tạo Voucher Mới' : '✏️ Cập nhật Voucher'}"></h2>
-
-    <form th:action="@{/vouchers/save}" th:object="${voucher}" method="post" class="row g-3 needs-validation" novalidate>
-        <input type="hidden" th:field="*{id}"/>
-        <input type="hidden" th:field="*{ngaytao}"/>
-        <input type="hidden" th:field="*{ngaysua}"/>
-
-        <div class="col-md-6">
-            <label class="form-label">Mã Voucher</label>
-            <input type="text" th:field="*{mavc}" class="form-control" required/>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label">Code</label>
-            <input type="text" th:field="*{code}" class="form-control" required/>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Giá trị giảm</label>
-            <input type="number" th:field="*{giatrigiam}" class="form-control" min="0" required/>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Điều kiện</label>
-            <input type="number" th:field="*{dieukien}" class="form-control" min="0" required/>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Trạng thái</label>
-            <select th:field="*{trangthai}" class="form-select" required>
-                <option value="1">Đang hoạt động</option>
-                <option value="0">Ngưng</option>
-            </select>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Loại giảm giá</label>
-            <input type="text" th:field="*{loaigiamgia}" class="form-control"/>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Loại Voucher</label>
-            <input type="text" th:field="*{loaivc}" class="form-control"/>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Số lượng</label>
-            <input type="number" th:field="*{soluong}" class="form-control" min="0"/>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label">Ngày bắt đầu</label>
-            <input type="date" th:field="*{ngayBatDau}" class="form-control"/>
-        </div>
-
-        <div class="col-md-6">
-            <label class="form-label">Ngày hết hạn</label>
-            <input type="date" th:field="*{ngayHetHan}" class="form-control"/>
-        </div>
-
-        <div class="col-12 text-center mt-3">
-            <button type="submit" class="btn btn-success px-4">💾 Lưu</button>
-            <a th:href="@{/vouchers}" class="btn btn-secondary px-4">↩ Quay lại</a>
-        </div>
-    </form>
-</div>
-
-<!-- ======= XEM CHI TIẾT VOUCHER ======= -->
-<div th:if="${mode == 'view'}" class="mt-5">
-    <h2 class="mb-4 text-center">🔍 Thông Tin Chi Tiết Voucher</h2>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <table class="table table-striped table-bordered">
-                <tbody>
-                <tr>
-                    <th style="width: 200px;">Mã Voucher</th>
-                    <td th:text="${voucher.mavc}">--</td>
-                </tr>
-                <tr>
-                    <th>Code</th>
-                    <td th:text="${voucher.code}">--</td>
-                </tr>
-                <tr>
-                    <th>Giá trị giảm</th>
-                    <td th:text="${voucher.giatrigiam}">--</td>
-                </tr>
-                <tr>
-                    <th>Điều kiện</th>
-                    <td th:text="${voucher.dieukien}">--</td>
-                </tr>
-                <tr>
-                    <th>Loại giảm giá</th>
-                    <td th:text="${voucher.loaigiamgia}">--</td>
-                </tr>
-                <tr>
-                    <th>Loại Voucher</th>
-                    <td th:text="${voucher.loaivc}">--</td>
-                </tr>
-                <tr>
-                    <th>Số lượng</th>
-                    <td th:text="${voucher.soluong}">--</td>
-                </tr>
-                <tr>
-                    <th>Trạng thái</th>
-                    <td th:text="${voucher.trangthai == 1 ? 'Đang hoạt động' : 'Ngưng'}">--</td>
-                </tr>
-                <tr>
-                    <th>Ngày bắt đầu</th>
-                    <td th:text="${#temporals.format(voucher.ngayBatDau, 'dd/MM/yyyy')}">--</td>
-                </tr>
-                <tr>
-                    <th>Ngày hết hạn</th>
-                    <td th:text="${#temporals.format(voucher.ngayHetHan, 'dd/MM/yyyy')}">--</td>
-                </tr>
-                </tbody>
-            </table>
-
-            <div class="text-center mt-4">
-                <a th:href="@{/vouchers}" class="btn btn-secondary">
-                    ⬅ Quay lại danh sách
-                </a>
-            </div>
-        </div>
+<!-- Bộ lọc -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <input id="keyword" type="text" class="form-control" placeholder="Từ khóa">
+    </div>
+    <div class="col-md-3">
+        <select id="status" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="1">Đang hoạt động</option>
+            <option value="0">Ngưng</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button onclick="loadVouchers(0)" class="btn btn-primary w-100">Tìm & Lọc</button>
+    </div>
+    <div class="col-md-3">
+        <button onclick="showCreateForm()" class="btn btn-success w-100">+ Tạo mới Voucher</button>
     </div>
 </div>
+
+<!-- Danh sách voucher -->
+<div id="listSection">
+    <table class="table table-bordered text-center">
+        <thead class="table-light">
+        <tr>
+            <th>Mã</th>
+            <th>Code</th>
+            <th>Giảm</th>
+            <th>Điều kiện</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody id="voucherTableBody"></tbody>
+    </table>
+    <nav>
+        <ul id="pagination" class="pagination justify-content-center"></ul>
+    </nav>
+</div>
+
+<!-- Form thêm/sửa/xem voucher -->
+<div id="formSection" style="display: none;">
+    <h4 id="formTitle">Tạo/Sửa Voucher</h4>
+    <form onsubmit="submitForm(event)">
+        <input type="hidden" id="id">
+
+        <!-- Thông tin cơ bản -->
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label for="mavc" class="form-label">Mã VC</label>
+                <input type="text" id="mavc" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="code" class="form-label">Code</label>
+                <input type="text" id="code" class="form-control" required>
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="trangthai" class="form-label">Trạng thái</label>
+                <select id="trangthai" class="form-select" required>
+                    <option value="1">Đang hoạt động</option>
+                    <option value="0">Ngưng</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="loaivc" class="form-label">Loại Voucher</label>
+                <input type="number" id="loaivc" class="form-control">
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="soluong" class="form-label">Số lượng</label>
+                <input type="number" id="soluong" class="form-control">
+            </div>
+        </div>
+
+        <!-- Thông tin giảm giá -->
+        <div class="row mt-3 border-top pt-3">
+            <div class="col-md-6 mb-2">
+                <label for="giatrigiam" class="form-label">Giá trị giảm</label>
+                <input type="number" id="giatrigiam" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="dieukien" class="form-label">Điều kiện</label>
+                <input type="number" id="dieukien" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="loaigiamgia" class="form-label">Loại giảm giá</label>
+                <select id="loaigiamgia" class="form-select">
+                    <option value="0">Theo phần trăm</option>
+                    <option value="1">Theo số tiền</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Ngày tháng -->
+        <div class="row mt-3 border-top pt-3">
+            <div class="col-md-6 mb-2">
+                <label for="ngaybatdau" class="form-label">Ngày bắt đầu</label>
+                <input type="date" id="ngaybatdau" class="form-control">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="ngayhethan" class="form-label">Ngày hết hạn</label>
+                <input type="date" id="ngayhethan" class="form-control">
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="ngaytao" class="form-label">Ngày tạo</label>
+                <input type="datetime-local" id="ngaytao" class="form-control bg-light" disabled title="Tự động sinh - không thể chỉnh">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="ngaysua" class="form-label">Ngày sửa</label>
+                <input type="datetime-local" id="ngaysua" class="form-control bg-light" disabled title="Tự động cập nhật khi lưu - không thể chỉnh">
+            </div>
+        </div>
+
+        <!-- Hành động -->
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <button type="button" id="btnCancel" onclick="cancelForm()" class="btn btn-secondary">Huỷ</button>
+        </div>
+    </form>
+</div>
+
 
 </body>
 </html>

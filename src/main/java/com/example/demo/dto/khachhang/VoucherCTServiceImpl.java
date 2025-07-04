@@ -7,45 +7,48 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VoucherCTServiceImpl implements VoucherCTService {
 
     @Autowired
-    private VoucherCTRepository repo;
+    private VoucherCTRepository repository;
 
     @Override
-    public Page<VoucherCT> getAll(String keyword, Pageable pageable) {
-        if (keyword != null && !keyword.isEmpty()) {
-            return repo.search(keyword.toLowerCase(), pageable);
-        }
-        return repo.findAll(pageable);
+    public List<VoucherCT> findAll() {
+        return repository.findAll();
     }
 
     @Override
-    public VoucherCT getById(String id) {
-        return repo.findById(id).orElse(null);
+    public Optional<VoucherCT> findById(String id) {
+        return repository.findDetailById(id);
     }
 
     @Override
-    public void save(VoucherCT v) {
-        if (v.getId() == null || v.getId().isEmpty()) {
-            v.setId(generateId());
-            v.setNgayTao(LocalDateTime.now());
-        } else {
-            v.setNgaySua(LocalDateTime.now());
-        }
-        repo.save(v);
-    }
-
-    private String generateId() {
-        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+    public VoucherCT save(VoucherCT voucherCT) {
+        VoucherCT saved = repository.save(voucherCT);
+        return repository.findDetailById(saved.getId()).orElse(saved);
     }
 
     @Override
     public void delete(String id) {
-        repo.deleteById(id);
+        repository.deleteById(id);
+    }
+
+    @Override
+    public List<VoucherCT> filterBy(String idvc, String idkh, String idhd) {
+        return repository.filterNoPage(idvc, idkh, idhd);
+    }
+
+    @Override
+    public Page<VoucherCT> filterBy(String idvc, String idkh, String idhd, Pageable pageable) {
+        return repository.filter(idvc, idkh, idhd, pageable);
+    }
+
+    @Override
+    public List<String> findUsedVoucherIds() {
+        return repository.findUsedVoucherIds();
     }
 }

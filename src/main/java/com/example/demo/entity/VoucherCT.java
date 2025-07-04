@@ -1,99 +1,61 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "VoucherCT")
+@Data
 public class VoucherCT {
+
     @Id
-    @Column(name = "ID", columnDefinition = "uniqueidentifier", length = 8, updatable = false, nullable = false)
+    @Column(name = "ID", length = 8)
     private String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IDVC")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Voucher voucher;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IDKH")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private KhachHang khachHang;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IDHD")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private HoaDon hoaDon;
 
     @Column(name = "TRANGTHAI")
-    private Integer trangThai;
+    private Integer trangthai;
 
-    @Column(name = "NGAYTAO")
-    private LocalDateTime ngayTao;
+    @Column(name = "NGAYTAO", updatable = false)
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime ngaytao;
 
     @Column(name = "NGAYSUA")
-    private LocalDateTime ngaySua;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime ngaysua;
 
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Voucher getVoucher() {
-        return voucher;
-    }
-
-    public void setVoucher(Voucher voucher) {
-        this.voucher = voucher;
-    }
-
-    public KhachHang getKhachHang() {
-        return khachHang;
-    }
-
-    public void setKhachHang(KhachHang khachHang) {
-        this.khachHang = khachHang;
-    }
-
-    public HoaDon getHoaDon() {
-        return hoaDon;
-    }
-
-    public void setHoaDon(HoaDon hoaDon) {
-        this.hoaDon = hoaDon;
-    }
-
-    public Integer getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(Integer trangThai) {
-        this.trangThai = trangThai;
-    }
-
-    public LocalDateTime getNgayTao() {
-        return ngayTao;
-    }
-
-    public void setNgayTao(LocalDateTime ngayTao) {
-        this.ngayTao = ngayTao;
-    }
-
-    public LocalDateTime getNgaySua() {
-        return ngaySua;
-    }
-
-    public void setNgaySua(LocalDateTime ngaySua) {
-        this.ngaySua = ngaySua;
-    }
     @PrePersist
-    public void generateId() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
+    public void onCreate() {
+        if (this.id == null || this.id.isEmpty()) {
+            this.id = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         }
+        this.ngaytao = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.ngaysua = LocalDateTime.now();
     }
 }
-
