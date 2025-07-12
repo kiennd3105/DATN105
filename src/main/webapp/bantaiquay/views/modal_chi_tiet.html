@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- modal_chi_tiet.html -->
+<p><strong>Người Nhận:</strong> <span th:text="${hoaDon.tenNguoiNhan}"></span></p>
+<p><strong>Địa Chỉ:</strong> <span th:text="${hoaDon.diaChiNguoiNhan}"></span></p>
+<p><strong>SĐT:</strong> <span th:text="${hoaDon.sdtNguoiNhan}"></span></p>
+<p><strong>Tổng Tiền:</strong> <span th:text="${#numbers.formatDecimal(hoaDon.tongTien, 0, 'COMMA', 2, 'POINT')}"></span></p>
+
+<h5 class="mt-4">Danh sách chi tiết hóa đơn</h5>
+<table class="table table-bordered table-hover table-sm mt-3">
+    <thead class="table-dark">
+    <tr>
+        <th>ID CTHD</th><th>Số Lượng</th><th>Đơn Giá</th><th>Tổng Tiền</th>
+        <th>Ghi Chú</th><th>Ngày Tạo</th><th>Ngày Sửa</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="ct : ${chiTietList}">
+        <td th:text="${ct.id}">ID</td>
+        <td th:text="${ct.soLuong}">SL</td>
+        <td th:text="${#numbers.formatDecimal(ct.donGia, 0, 'COMMA', 2, 'POINT')}">ĐG</td>
+        <td th:text="${#numbers.formatDecimal(ct.tongTien, 0, 'COMMA', 2, 'POINT')}">TT</td>
+        <td th:text="${ct.ghiChu}">Ghi chú</td>
+        <td th:text="${#temporals.format(ct.ngayTao, 'dd/MM/yyyy HH:mm')}">Tạo</td>
+        <td th:text="${#temporals.format(ct.ngaySua, 'dd/MM/yyyy HH:mm')}">Sửa</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
