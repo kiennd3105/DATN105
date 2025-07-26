@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản Lý Voucher</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../script/voucher.js" defer></script>
+</head>
+<body class="container mt-4">
+
+<h2 class="text-center mb-4">Danh sách Voucher</h2>
+
+<!-- Bộ lọc -->
+<div class="row mb-3">
+    <div class="col-md-4">
+        <input id="keyword" type="text" class="form-control" placeholder="Từ khóa">
+    </div>
+    <div class="col-md-3">
+        <select id="status" class="form-select">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="1">Đang hoạt động</option>
+            <option value="0">Ngưng</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button onclick="loadVouchers(0)" class="btn btn-primary w-100">Tìm & Lọc</button>
+    </div>
+    <div class="col-md-3">
+        <button onclick="showCreateForm()" class="btn btn-success w-100">+ Tạo mới Voucher</button>
+    </div>
+</div>
+
+<!-- Danh sách voucher -->
+<div id="listSection">
+    <table class="table table-bordered text-center">
+        <thead class="table-light">
+        <tr>
+            <th>Mã</th>
+            <th>Code</th>
+            <th>Giảm</th>
+            <th>Điều kiện</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody id="voucherTableBody"></tbody>
+    </table>
+    <nav>
+        <ul id="pagination" class="pagination justify-content-center"></ul>
+    </nav>
+</div>
+
+<!-- Form thêm/sửa/xem voucher -->
+<div id="formSection" style="display: none;">
+    <h4 id="formTitle">Tạo/Sửa Voucher</h4>
+    <form onsubmit="submitForm(event)">
+        <input type="hidden" id="id">
+
+        <!-- Thông tin cơ bản -->
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label for="mavc" class="form-label">Mã VC</label>
+                <input type="text" id="mavc" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="code" class="form-label">Code</label>
+                <input type="text" id="code" class="form-control" required>
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="trangthai" class="form-label">Trạng thái</label>
+                <select id="trangthai" class="form-select" required>
+                    <option value="1">Đang hoạt động</option>
+                    <option value="0">Ngưng</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="loaivc" class="form-label">Loại Voucher</label>
+                <input type="number" id="loaivc" class="form-control">
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="soluong" class="form-label">Số lượng</label>
+                <input type="number" id="soluong" class="form-control">
+            </div>
+        </div>
+
+        <!-- Thông tin giảm giá -->
+        <div class="row mt-3 border-top pt-3">
+            <div class="col-md-6 mb-2">
+                <label for="giatrigiam" class="form-label">Giá trị giảm</label>
+                <input type="number" id="giatrigiam" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="dieukien" class="form-label">Điều kiện</label>
+                <input type="number" id="dieukien" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="loaigiamgia" class="form-label">Loại giảm giá</label>
+                <select id="loaigiamgia" class="form-select">
+                    <option value="0">Theo phần trăm</option>
+                    <option value="1">Theo số tiền</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Ngày tháng -->
+        <div class="row mt-3 border-top pt-3">
+            <div class="col-md-6 mb-2">
+                <label for="ngaybatdau" class="form-label">Ngày bắt đầu</label>
+                <input type="date" id="ngaybatdau" class="form-control">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="ngayhethan" class="form-label">Ngày hết hạn</label>
+                <input type="date" id="ngayhethan" class="form-control">
+            </div>
+
+            <div class="col-md-6 mb-2">
+                <label for="ngaytao" class="form-label">Ngày tạo</label>
+                <input type="datetime-local" id="ngaytao" class="form-control bg-light" disabled title="Tự động sinh - không thể chỉnh">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="ngaysua" class="form-label">Ngày sửa</label>
+                <input type="datetime-local" id="ngaysua" class="form-control bg-light" disabled title="Tự động cập nhật khi lưu - không thể chỉnh">
+            </div>
+        </div>
+
+        <!-- Hành động -->
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <button type="button" id="btnCancel" onclick="cancelForm()" class="btn btn-secondary">Huỷ</button>
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>
