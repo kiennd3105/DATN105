@@ -1,6 +1,5 @@
 package com.example.demo.dto.khachhang;
 
-import com.example.demo.dto.khachhang.VoucherDTO;
 import com.example.demo.entity.KhachHang;
 import com.example.demo.entity.Voucher;
 import org.springframework.data.domain.Page;
@@ -22,8 +21,8 @@ public interface VoucherService {
     Voucher toggleStatus(String id);
     Page<Voucher> searchByKeywordAndStatus(String keyword, String status, Pageable pageable);
 
-    // Mapping
-//    KhachHangDTO toDTO(KhachHang entity);
-//    KhachHang toEntity(KhachHangDTO dto);
-
+    KhachHangDTO toDTO(KhachHang entity);
+    KhachHang toEntity(KhachHangDTO dto);
+    VoucherDTO toDTO(Voucher entity);
+    Voucher toEntity(VoucherDTO dto);
 }

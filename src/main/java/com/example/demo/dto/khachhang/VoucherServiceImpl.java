@@ -3,14 +3,16 @@ package com.example.demo.dto.khachhang;
 import com.example.demo.entity.KhachHang;
 import com.example.demo.entity.Voucher;
 import com.example.demo.repository.VoucherRepository;
+import com.example.demo.repository.KhachHangRepository;
+import com.example.demo.dto.khachhang.VoucherDTO;
+import com.example.demo.dto.khachhang.KhachHangDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,8 +20,9 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Autowired
     private VoucherRepository voucherRepository;
+
     @Autowired
-    private KhachHangService khachHangService;
+    private KhachHangRepository khachHangRepository;
 
     @Override
     public List<Voucher> findAll() {
@@ -42,12 +45,17 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    @Transactional
     public Voucher save(Voucher voucher) {
         return voucherRepository.save(voucher);
     }
 
     @Override
+    @Transactional
     public Voucher update(String id, Voucher voucher) {
+        if (!voucherRepository.existsById(id)) {
+            throw new NoSuchElementException("Voucher not found with id: " + id);
+        }
         voucher.setId(id);
         return voucherRepository.save(voucher);
     }
@@ -69,10 +77,14 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public Voucher toggleStatus(String id) {
-        return findById(id).map(v -> {
-            v.setTrangthai(v.getTrangthai() == 1 ? 0 : 1);
-            return voucherRepository.save(v);
-        }).orElseThrow(() -> new RuntimeException("Voucher không tồn tại"));
+        Optional<Voucher> optionalVoucher = voucherRepository.findById(id);
+        if (optionalVoucher.isEmpty()) {
+            throw new NoSuchElementException("Voucher not found with id: " + id);
+        }
+        Voucher voucher = optionalVoucher.get();
+        int currentStatus = voucher.getTrangthai();
+        voucher.setTrangthai(currentStatus == 1 ? 0 : 1);
+        return voucherRepository.save(voucher);
     }
 
     @Override
@@ -85,29 +97,70 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherRepository.findByKeywordAndTrangthai(keyword, st, pageable);
     }
 
-//    @Override
-//    public VoucherDTO toDTO(Voucher entity) {
-//        VoucherDTO dto = modelMapper.map(entity, VoucherDTO.class);
-//        if (entity.getKhachHangs() != null) {
-//            Set<KhachHangDTO> khachHangs = entity.getKhachHangs().stream()
-//                    .map(khachHangService::toDTO)
-//                    .collect(Collectors.toSet());
-//            dto.setKhachHangs(khachHangs);
-//        }
-//        return dto;
-//    }
-//
-//    @Override
-//    public Voucher toEntity(VoucherDTO dto) {
-//        Voucher entity = modelMapper.map(dto, Voucher.class);
-//        if (dto.getKhachHangs() != null) {
-//            Set<KhachHang> khachHangs = dto.getKhachHangs().stream()
-//                    .map(khachHangService::toEntity)
-//                    .collect(Collectors.toSet());
-//            entity.setKhachHangs(khachHangs);
-//        }
-//        return entity;
-//    }
+    @Override
+    public KhachHangDTO toDTO(KhachHang entity) {
+        return KhachHangDTO.builder()
+                .id(entity.getId())
+                .ten(entity.getTen())
+                .email(entity.getEmail())
+                .sdt(entity.getSdt())
+                .build();
+    }
 
+    @Override
+    public KhachHang toEntity(KhachHangDTO dto) {
+        return KhachHang.builder()
+                .id(dto.getId())
+                .ten(dto.getTen())
+                .email(dto.getEmail())
+                .sdt(dto.getSdt())
+                .build();
+    }
+
+    @Override
+    public VoucherDTO toDTO(Voucher entity) {
+        return VoucherDTO.builder()
+                .id(entity.getId())
+                .mavc(entity.getMavc())
+                .code(entity.getCode())
+                .dieukien(entity.getDieukien())
+                .giatrigiam(entity.getGiatrigiam())
+                .loaivc(entity.getLoaivc())
+                .soluong(entity.getSoluong())
+                .loaigiamgia(entity.getLoaigiamgia())
+                .trangthai(entity.getTrangthai())
+                .ngaytao(entity.getNgaytao())
+                .ngaysua(entity.getNgaysua())
+                .ngayBatDau(entity.getNgayBatDau())
+                .ngayHetHan(entity.getNgayHetHan())
+                .khachHangs(entity.getKhachHangs()
+                        .stream()
+                        .map(this::toDTO)
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+    @Override
+    public Voucher toEntity(VoucherDTO dto) {
+        Set<KhachHang> khachHangs = dto.getKhachHangs().stream()
+                .map(this::toEntity)
+                .collect(Collectors.toSet());
+
+        return Voucher.builder()
+                .id(dto.getId())
+                .mavc(dto.getMavc())
+                .code(dto.getCode())
+                .dieukien(dto.getDieukien())
+                .giatrigiam(dto.getGiatrigiam())
+                .loaivc(dto.getLoaivc())
+                .soluong(dto.getSoluong())
+                .loaigiamgia(dto.getLoaigiamgia())
+                .trangthai(dto.getTrangthai())
+                .ngaytao(dto.getNgaytao())
+                .ngaysua(dto.getNgaysua())
+                .ngayBatDau(dto.getNgayBatDau())
+                .ngayHetHan(dto.getNgayHetHan())
+                .khachHangs(khachHangs)
+                .build();
+    }
 }
-
